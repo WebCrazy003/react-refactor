@@ -1,26 +1,55 @@
 import { DeleteIcon } from "@chakra-ui/icons";
 import {
   Box,
-  Button,
   Center,
   Checkbox,
-  Flex,
-  FormControl,
   Heading,
   IconButton,
-  Input,
-  List,
-  ListItem,
-  Spacer,
-  Text,
 } from "@chakra-ui/react";
 import { SyntheticEvent, useEffect, useState } from "react";
+import { Column } from "react-table";
 
-import { ToDoItem } from "./types/ToDoItem";
 import Table from "./Table";
+import { ToDoItem } from "./types/ToDoItem";
 
 function ToDoList() {
   const [toDoItems, setToDoItems] = useState<ToDoItem[]>([]);
+  const [toDoColumns, setTodoColumns] = useState<Column<ToDoItem>[]>(
+    [
+      {
+        Header: "DONE",
+        accessor: (row: ToDoItem, index: number) => (
+          <Checkbox
+            isChecked={row.completed}
+            onChange={() => handleToggleItem(row.id, index)}
+            width={100}
+            px={6}
+            py={4}
+          />
+        )
+      },
+      {
+        Header: "DESCRIPTION",
+        accessor: "description",
+      },
+      {
+        Header: " ",
+        accessor: (row: ToDoItem, index: number) => (
+          <Box px={6} py={4}>
+            <IconButton
+              icon={<DeleteIcon />}
+              aria-label="Delete this item"
+              onClick={() => handleDeleteItem(row.id, index)}
+              size="xs"
+              background="gray.600"
+              _hover={{ bg: "red.600" }}
+              color="white"
+            />
+          </Box>
+        )
+      },
+    ]
+  );
   const [newItemDescription, setNewItemDescription] = useState<string>("");
 
   useEffect(() => {
@@ -88,94 +117,7 @@ function ToDoList() {
         </Box>
       </Center>
 
-      {/* <Center>
-        <Box width="640px">
-          <Table />
-        </Box>
-      </Center> */}
-      
-      {/* TODO replace the following block with the <Table /> component you create */}
-      <Center alignItems="baseline">
-        <Box width="640px">
-          <List>
-            <ListItem>
-              <Flex alignItems="center" color="gray.600" fontWeight={600}>
-                <Text
-                  fontSize={12}
-                  px={6}
-                  py={3}
-                  textTransform="uppercase"
-                  width={100}
-                >
-                  Done
-                </Text>
-                <Text fontSize={12} px={6} py={3} textTransform="uppercase">
-                  Description
-                </Text>
-                <Text
-                  fontSize={12}
-                  px={6}
-                  py={3}
-                  textTransform="uppercase"
-                ></Text>
-              </Flex>
-            </ListItem>
-            {toDoItems.map((item, index) => (
-              <ListItem key={item.id}>
-                <Flex
-                  alignItems="center"
-                  bg={index % 2 === 0 ? "gray.100" : "white"}
-                >
-                  <Checkbox
-                    isChecked={item.completed}
-                    onChange={() => handleToggleItem(item.id, index)}
-                    width={100}
-                    px={6}
-                    py={4}
-                  />
-                  <Text fontSize={16} px={6} py={4}>
-                    {item.description}
-                  </Text>
-                  <Spacer />
-                  <Box px={6} py={4}>
-                    <IconButton
-                      icon={<DeleteIcon />}
-                      aria-label="Delete this item"
-                      onClick={() => handleDeleteItem(item.id, index)}
-                      size="xs"
-                      background="gray.600"
-                      _hover={{ bg: "red.600" }}
-                      color="white"
-                    />
-                  </Box>
-                </Flex>
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-      </Center>
-
-      <Center>
-        <Box p={4} width="640px" bg="gray.50">
-          <form onSubmit={handleSubmitNewItem}>
-            <Flex>
-              <FormControl>
-                <Input
-                  id="new-item"
-                  type="text"
-                  placeholder="Enter a new to-do item"
-                  autoFocus
-                  value={newItemDescription}
-                  onChange={(e) => setNewItemDescription(e.target.value)}
-                />
-              </FormControl>
-              <Button type="submit" marginLeft={2}>
-                Submit
-              </Button>
-            </Flex>
-          </form>
-        </Box>
-      </Center>
+      <Table<ToDoItem> columns={toDoColumns} data={toDoItems} />
     </>
   );
 }
